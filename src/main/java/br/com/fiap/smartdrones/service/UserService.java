@@ -2,7 +2,6 @@ package br.com.fiap.smartdrones.service;
 
 import br.com.fiap.smartdrones.dto.UserDTO;
 import br.com.fiap.smartdrones.model.User;
-import br.com.fiap.smartdrones.model.UserRole;
 import br.com.fiap.smartdrones.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +23,11 @@ public class UserService {
 
     @Transactional
     public User createUser(UserDTO userDTO) {
-        User user = User.builder()
-                .username(userDTO.getUsername())
-                .email(userDTO.getEmail())
-                .password(passwordEncoder.encode(userDTO.getPassword()))
-                .role(UserRole.USER)
-                .build();
+        User user = new User();
+        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRole(userDTO.getRole() != null ? userDTO.getRole() : "USER");
         return userRepository.save(user);
     }
 
@@ -52,6 +50,9 @@ public class UserService {
             if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
                 user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
             }
+            if (userDTO.getRole() != null && !userDTO.getRole().isEmpty()) {
+                user.setRole(userDTO.getRole());
+            }
             return userRepository.save(user);
         } else {
             throw new EntityNotFoundException("Usuário não encontrado com ID: " + id);
@@ -59,7 +60,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUserRole(Long id, UserRole newRole) {
+    public User updateUserRole(Long id, String newRole) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();

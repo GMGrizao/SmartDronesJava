@@ -1,9 +1,9 @@
 package br.com.fiap.smartdrones.config;
 
-import br.com.fiap.smartdrones.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,9 +20,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Autowired
-    private AuthService authService;
-
-    @Autowired
     private AuthFilter authFilter;
 
     @Bean
@@ -30,7 +27,24 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/api-docs/**"
+                ).permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                .requestMatchers("/api/users/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/drones/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/drones/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/drones/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/sensors/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/sensors/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/sensors/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/leituras/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/leituras/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/leituras/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

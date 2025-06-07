@@ -2,7 +2,6 @@ package br.com.fiap.smartdrones.controller;
 
 import br.com.fiap.smartdrones.dto.UserDTO;
 import br.com.fiap.smartdrones.model.User;
-import br.com.fiap.smartdrones.model.UserRole;
 import br.com.fiap.smartdrones.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,34 +26,34 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.findAllUsers());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         User user = userService.findUserById(id);
         return ResponseEntity.ok(user);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @userSecurity.isCurrentUser(#id)")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
         User updatedUser = userService.updateUser(id, userDTO);
         return ResponseEntity.ok(updatedUser);
     }
 
     @PutMapping("/{id}/role")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> updateUserRole(@PathVariable Long id, @RequestParam UserRole newRole) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<User> updateUserRole(@PathVariable Long id, @RequestParam String newRole) {
         User updatedUser = userService.updateUserRole(id, newRole);
         return ResponseEntity.ok(updatedUser);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
